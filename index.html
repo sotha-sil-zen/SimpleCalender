@@ -1,0 +1,302 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>记事日历</title>
+		<script id="jquery_183" type="text/javascript" class="library" src="http://libs.baidu.com/jquery/1.8.3/jquery.min.js"></script>
+		<script type="text/javascript">
+
+function random(dayseed, indexseed) {
+	var n = dayseed % 11117;
+	for (var i = 0; i < 100 + indexseed; i++) {
+		n = n * n;
+		n = n % 11117;   // 11117 是个质数
+	}
+	return n;
+}
+/*
+ * 注意：Month从0开始
+ */
+var pivot_day = new Date(2023, 3, 16, 0, 0, 0, 0);
+
+var today = new Date();
+var iday = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+
+var regular_activities = [ 
+	{name:"检查电瓶车电量",detail:"及时充电",every_x_day:1,bias:0},
+	{name:"是否需要带雨伞",detail:"如有需要，雨伞应该放在背包中",every_x_day:1,bias:0},
+	{name:"早睡早起",detail:"规律作息，保证work-life balence",every_x_day:1,bias:0},
+	{name:"更换衣物",detail:"容易脏的衣服以及贴身衣物应当一天一换",every_x_day:1,bias:0},
+	{name:"早晚课",detail:"",every_x_day:1,bias:0},
+	{name:"健身环",detail:"",every_x_day:1,bias:0},
+	{name:"及时休息",detail:"拒绝过度劳累，工作一定时间后应当短暂休息",every_x_day:1,bias:0},
+	
+	{name:"推进自由编程项目",detail:"",every_x_day:2,bias:0},
+	{name:"练琴",detail:"",every_x_day:2,bias:1},
+	{name:"适度游戏",detail:"",every_x_day:2,bias:1},
+	
+	{name:"洗衣服",detail:"",every_x_day:7,bias:1},
+	{name:"洗衣服",detail:"",every_x_day:7,bias:4},
+	
+	{name:"洗床单被套等，适当扫除",detail:"",every_x_day:28,bias:6},
+	{name:"洗浴巾睡衣等，适当扫除",detail:"",every_x_day:28,bias:13},
+	{name:"洗鞋，适当扫除",detail:"",every_x_day:28,bias:20},
+	{name:"扫除",detail:"",every_x_day:28,bias:27}]
+	
+var special_activities=[
+	{name:"暂无",detail:"暂无"}
+]
+
+var delayed_activities=[
+	{name:"暂无",detail:"暂无"}
+]
+	
+	
+
+var weeks = ["日","一","二","三","四","五","六"];
+
+
+function is_someday() 
+{
+/*
+ * 注意：getMonth从0开始
+ */
+	return today.getMonth() == 9 && today.getDate() == 26;
+}
+
+function getTodayString() {
+	return "今天是" + today.getFullYear() + "年" + (today.getMonth() + 1) + "月" + today.getDate() + "日 星期" + weeks[today.getDay()];
+}
+
+
+function pickTodaysWork() 
+{
+	var _activities = filter(regular_activities);
+    
+	for (var i = 0; i < _activities.length; i++) 
+	{
+		addToToday(_activities[i]);
+	}
+	for (var i = 0; i < delayed_activities.length; i++) 
+	{
+		addToDelay(delayed_activities[i]);
+	}
+	for (var i = 0; i < special_activities.length; i++) 
+	{
+		addToSpecial(special_activities[i]);
+	}
+}
+
+// 去掉一些不合今日的事件
+function filter(activities) {
+    var result = [];
+    
+	var pivot_time=pivot_day.getTime();
+	console.log(pivot_time)
+	var cur_time=today.getTime();
+	console.log(cur_time)
+	var day_x=Math.abs(cur_time-pivot_time)
+	console.log(day_x)
+	day_x= Math.floor(day_x/(1000*60*60*24));
+	console.log(day_x)
+	for (var i = 0; i < activities.length; i++) 
+	{
+		if ((day_x % activities[i].every_x_day) == activities[i].bias) 
+		{
+			result.push(activities[i]);
+		}
+	}
+        
+	return result;
+}
+
+function isWeekend() {
+    return today.getDay() == 0 || today.getDay() == 6;
+}
+
+function addToToday(event) 
+{
+	$('.todaywork .content ul').append('<li><div class="name">' + event.name + '</div><div class="description">' + event.detail + '</div></li>');
+}
+function addToDelay(event) 
+{
+	$('.delayedwork .content ul').append('<li><div class="name">' + event.name + '</div><div class="description">' + event.detail + '</div></li>');
+}
+function addToSpecial(event) 
+{
+	$('.specialwork .content ul').append('<li><div class="name">' + event.name + '</div><div class="description">' + event.detail + '</div></li>');
+}
+
+$(function()
+{
+	$('.date').html(getTodayString());
+	pickTodaysWork();
+});
+
+		</script>
+
+	<style type="text/css">
+
+	body * {
+	font-family:"Consolas","Microsoft Yahei", Arial, sans-serif;
+}
+
+body {
+	background: white;
+	margin: 0;
+	padding: 0;
+}
+
+.container {
+	width: 320px;
+	margin: 0 auto 50px;
+}
+
+.container>.title {
+	color: #bbb;
+	font-weight: bold;
+	margin-bottom: 10px;
+	background: #555;
+	padding: 5px 15px;
+}
+
+.date{
+	font-size:17pt;
+	font-weight: bold;
+	line-height: 30pt;
+	text-align: center;
+}
+
+.split, .clear {
+	clear: both;
+	height: 1px;
+	overflow-y: hidden;
+}
+
+.todaywork, .delayedwork, .specialwork{
+	clear: both;
+	position: relative;
+}
+
+.todaywork .title, .delayedwork .title, .specialwork .title {
+	float: left;
+	width: 100px;
+	font-weight: bold;
+	text-align: center;
+	font-size: 30pt;
+	position:absolute;
+	top:0;
+	bottom:0;
+}
+
+.todaywork .title>table, .delayedwork .title>table, .specialwork .title>table {
+	position:absolute;
+	width:100%;
+	height:100%;
+	border:none;
+}
+
+.todaywork .title {
+	background: #88ff88;
+}
+
+
+.delayedwork .title{
+	background: #ffff66;
+}
+
+.specialwork .title{
+	background: #ff8844;
+}
+
+
+.todaywork .content, .delayedwork .content, .specialwork .content {
+	margin-left: 115px;
+	padding-right: 10px;
+	padding-top: 1px;
+	font-size:15pt;
+}
+
+.todaywork {
+	background: #ccffcc;
+}
+
+.delayedwork{
+	background: #ffffbb;
+}
+
+.specialwork{
+	background: #ffccaa;
+}
+
+.content ul {
+	list-style: none;
+	margin:10px 0 0;
+	padding:0;
+}
+
+.content ul li {
+	line-height:150%;
+	font-size: 15pt;
+	font-weight: bold;
+	color: #444;
+}
+
+.content ul li div.description {
+	font-size: 11pt;
+	font-weight: normal;
+	color: #777;
+	line-height: 110%;
+	margin-bottom: 10px;
+}
+
+	</style>
+
+	</head>
+	<body>
+		<div class="container">
+			<div class="title">
+				记事日历<sup>SothaSil</sup>
+			</div>
+			<div class="date">
+			</div>
+			<div class="todaywork">
+				<div class="title">
+					<table>
+						<tr><td>今日</td></tr>
+					</table>
+				</div>
+				<div class="content">
+					<ul></ul>
+				</div>
+				<div class="clear"></div>
+			</div>
+			<div class="split"></div>
+			<div class="delayedwork">
+				<div class="title">
+					<table>
+						<tr><td>作未</td></tr>
+					</table>
+				</div>
+				<div class="content">
+					<ul></ul>
+				</div>
+				<div class="clear"></div>
+			</div>
+			<div class="split"></div>
+			<div class="specialwork">
+				<div class="title">
+					<table>
+						<tr><td>特殊</td></tr>
+					</table>
+				</div>
+				<div class="content">
+					<ul></ul>
+				</div>
+				<div class="clear"></div>
+			</div>
+			<div class="split"></div>
+		</div>
+	</body>
+</html>
